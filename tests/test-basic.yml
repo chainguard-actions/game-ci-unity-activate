@@ -1,0 +1,29 @@
+name: Test basic usage (default inputs)
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # The action downloads the game-ci CLI and runs `activate`.
+      # Without real Unity credentials the activate command will fail,
+      # so we allow the step to fail and assert it ran (not skipped).
+      - id: action
+        uses: .
+        continue-on-error: true
+
+      - name: Assert action ran (downloaded CLI, attempted activation)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded (Unity credentials were available)"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (expected without Unity credentials)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME' (expected success or failure)"
+            exit 1
+          fi

@@ -1,0 +1,103 @@
+name: Actions 😎
+on:
+  pull_request: {}
+  push: { branches: [main] }
+
+permissions:
+  contents: read
+
+env:
+  UNITY_LICENSE: ${{ secrets.UNITY_LICENSE }}
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      - name: Read Node version from mise.toml
+        id: node
+        run: echo "version=$(grep -E '^node\s*=' mise.toml | sed -E 's/.*"([^"]+)".*/\1/')" >> "$GITHUB_OUTPUT"
+
+      - name: Install package manager (from package.json)
+        run: |
+          corepack enable
+          corepack install
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: ${{ steps.node.outputs.version }}
+
+      - name: Resolve yarn cache folder
+        id: yarn-config
+        run: echo "cacheFolder=$(yarn config get cacheFolder)" >> "$GITHUB_OUTPUT"
+
+      - name: Restore yarn install cache (node_modules + cacheFolder + install-state)
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
+        with:
+          path: |
+            node_modules
+            ${{ steps.yarn-config.outputs.cacheFolder }}
+            .yarn/install-state.gz
+          key: yarn-${{ runner.os }}-node${{ steps.node.outputs.version }}-${{ hashFiles('yarn.lock') }}
+          restore-keys: |
+            yarn-${{ runner.os }}-node${{ steps.node.outputs.version }}-
+
+      - name: Install deps
+        env:
+          YARN_ENABLE_HARDENED_MODE: 'false'
+        run: |
+          case "$(yarn --version)" in 1.*) echo 'expected up-to-date yarn version'; exit 1 ;; esac
+          yarn install --immutable
+
+      - name: Format
+        run: yarn format:check
+
+      - name: Lint
+        run: yarn lint
+
+      - name: Typecheck
+        run: yarn typecheck
+
+      - name: Test
+        run: yarn test
+
+      - name: Build
+        run: yarn build || { echo 'build command should always succeed'; exit 61; }
+
+  requestActivation:
+    name: Activate ${{ matrix.unityVersion }} ✔
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        unityVersion:
+          # Note: Major version differences may require different activation files.
+          - 2018.4.15f1
+          - 2019.2.11f1
+          - 2019.2.14f1
+          - 2019.2.17f1
+    steps:
+      # Checkout repository (required to test local actions)
+      - name: Checkout repository
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+
+      # The thin wrapper shells out to game-ci/cli, which detects the engine
+      # (and Unity version) from ProjectSettings/ProjectVersion.txt in the
+      # checked-out workspace - unlike the old self-contained action, it's
+      # no longer enough for this job to just check out unity-activate's own
+      # repo with no Unity project in it ("Engine not detected from
+      # projectPath"). Write a minimal fixture matching the matrix version.
+      - name: Write a minimal Unity project fixture
+        env:
+          UNITY_VERSION: ${{ matrix.unityVersion }}
+        run: |
+          mkdir -p ProjectSettings
+          echo "m_EditorVersion: $UNITY_VERSION" > ProjectSettings/ProjectVersion.txt
+
+      # Activate Unity
+      - name: Activate Unity
+        uses: ./
+        with:
+          unityVersion: ${{ matrix.unityVersion }}

@@ -1,14 +1,53 @@
-# game-ci/unity-activate
+# Unity - Activate
 
-Activate Unity using credentials or a license file. Both personal and professional licenses are supported.
+(Not affiliated with Unity Technologies)
 
-Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/game-ci/unity-activate](https://github.com/game-ci/unity-activate).
+GitHub Action to [activate](https://github.com/marketplace/actions/unity-activate) Unity.
 
-## Versions
+Part of the <a href="https://game.ci">GameCI</a> open source project.
+<br />
+<br />
 
-| Version | Tag | Upstream commit |
-|---------|-----|-----------------|
-| v1.1 | [`v1.1`](https://github.com/chainguard-actions/game-ci-unity-activate/tree/v1.1) | [`9f17963`](https://github.com/game-ci/unity-activate/commit/9f17963cae6976c15d6ae6ce57df821076901d45) |
+[![Actions status](https://github.com/game-ci/unity-activate/actions/workflows/main.yml/badge.svg)](https://github.com/game-ci/unity-activate/actions/workflows/main.yml)
+<br />
+<br />
+
+## How to use
+
+Find the
+[docs](https://game.ci/docs/github/activation)
+on the GameCI
+[documentation website](https://game.ci/docs).
+
+## Related actions
+
+Visit the
+GameCI <a href="https://github.com/game-ci/unity-actions">Unity Actions</a>
+status repository for related Actions.
+
+## Community
+
+Feel free to join us on
+<a href="http://game.ci/discord"><img height="30" src="media/Discord-Logo.svg" alt="Discord" /></a>
+and engage with the community.
+
+## Contributing
+
+To help improve the documentation, please find the docs [repository](https://github.com/game-ci/documentation).
+
+To contribute to this project, kindly read the [contribution guide](./CONTRIBUTING.md).
+
+## Support us
+
+GameCI is free for everyone forever.
+
+You can support us at [OpenCollective](https://opencollective.com/game-ci).
+
+## Licence
+
+This repository is [MIT](./LICENSE) licensed.
+
+This includes all contributions from the community.
 
 ## Privacy
 
